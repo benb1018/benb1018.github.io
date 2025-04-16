@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compound Interest Calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+    input, select, button {
+      margin: 10px 0;
+      padding: 8px;
+      width: 100%;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+    canvas {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Compound Interest Calculator</h2>
+    <label>Initial Investment ($):</label>
+    <input type="number" id="initial" value="1000">
+
+    <label>Annual Interest Rate (%):</label>
+    <input type="number" id="rate" value="5">
+
+    <label>Rate Variance (%):</label>
+    <input type="number" id="variance" value="0">
+
+    <label>Time (Years):</label>
+    <input type="number" id="time" value="10">
+
+    <label>Contribution Amount ($):</label>
+    <input type="number" id="contribution" value="100">
+
+    <label>Contribution Frequency:</label>
+    <select id="frequency">
+      <option value="12">Monthly</option>
+      <option value="1">Annually</option>
+    </select>
+
+    <button onclick="calculateInterest()">Calculate</button>
+    <h3 id="result"></h3>
+    <canvas id="interestChart" width="600" height="400"></canvas>
+  </div>
+
+  <script>
+    function generatePath(initial, baseRate, variance, time, contribution, frequency) {
+      const periods = time * frequency;
+      const values = [initial];
+      let current = initial;
+
+      for (let i = 1; i <= periods; i++) {
+        const rate = (baseRate + (Math.random() * variance * 2 - variance)) / 100 / frequency;
+        current = current * (1 + rate) + contribution;
+        values.push(current);
+      }
+      return values;
+    }
+
+    function calculateInterest() {
+      const initial = parseFloat(document.getElementById('initial').value);
+      const rate = parseFloat(document.getElementById('rate').value);
+      const variance = parseFloat(document.getElementById('variance').value);
+      const time = parseFloat(document.getElementById('time').value);
+      const contribution = parseFloat(document.getElementById('contribution').value);
+      const frequency = parseInt(document.getElementById('frequency').value);
+      const periods = time * frequency;
+
+      const basePath = generatePath(initial, rate, 0, time, contribution, frequency);
+      const variantPaths = [
+        generatePath(initial, rate, variance, time, contribution, frequency),
+        generatePath(initial, rate, variance, time, contribution, frequency),
+        generatePath(initial, rate, variance, time, contribution, frequency)
+      ];
+
+      const labels = Array.from({ length: periods + 1 }, (_, i) => (i / frequency).toFixed(2));
+
+      document.getElementById('result').innerText = `Base Case Future Value: $${basePath[basePath.length - 1].toFixed(2)}`;
+
+      const ctx = document.getElementById('interestChart').getContext('2d');
+      if (window.chart) window.chart.destroy();
+      window.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Base Case',
+              data: basePath,
+              borderWidth: 2,
+              borderColor: 'blue',
+              fill: false
+            },
+            ...variantPaths.map((path, i) => ({
+              label: `Variance Path ${i + 1}`,
+              data: path,
+              borderWidth: 1,
+              borderColor: `rgba(${100 + i * 50}, 0, 0, 0.5)`
+            }))
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Compound Interest Growth Over Time'
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Years'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Value ($)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
