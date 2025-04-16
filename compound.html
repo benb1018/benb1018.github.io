@@ -1,1 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compound Interest Calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      margin-top: 10px;
+      display: block;
+      font-weight: 600;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #result {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #222;
+    }
+    nav {
+      text-align: center;
+      margin-bottom: 20px;
+      background: #f0f0f0;
+      padding: 10px 0;
+      border-radius: 8px;
+    }
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #007bff;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    canvas {
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="compound.html">Compound Calculator</a>
+    <a href="retirement.html">Retirement Planner</a>
+    <a href="loan.html">Loan Tool</a>
+  </nav>
 
+  <div class="container">
+    <h2>Compound Interest Calculator</h2>
+
+    <label>Initial Investment ($):</label>
+    <input type="number" id="initial" value="1000" />
+
+    <label>Annual Interest Rate (%):</label>
+    <input type="number" id="rate" value="5" />
+
+    <label>Rate Variance (%):</label>
+    <input type="number" id="variance" value="1" />
+
+    <label>Time (Years):</label>
+    <input type="number" id="time" value="10" />
+
+    <label>Contribution Amount ($):</label>
+    <input type="number" id="contribution" value="100" />
+
+    <label>Contribution Frequency:</label>
+    <select id="frequency">
+      <option value="12">Monthly</option>
+      <option value="1">Annually</option>
+    </select>
+
+    <button onclick="calculateInterest()">Calculate</button>
+    <div id="result"></div>
+
+    <canvas id="interestChart"></canvas>
+  </div>
+
+  <script>
+    function generatePath(initial, rate, variance, time, contribution, freq) {
+      const periods = time * freq;
+      let values = [initial];
+      let value = initial;
+      for (let i = 1; i <= periods; i++) {
+        let randomRate = (rate + (Math.random() * 2 * variance - variance)) / 100 / freq;
+        value = value * (1 + randomRate) + contribution;
+        values.push(value);
+      }
+      return values;
+    }
+
+    function calculateInterest() {
+      const initial = parseFloat(document.getElementById('initial').value);
+      const rate = parseFloat(document.getElementById('rate').value);
+      const variance = parseFloat(document.getElementById('variance').value);
+      const time = parseFloat(document.getElementById('time').value);
+      const contribution = parseFloat(document.getElementById('contribution').value);
+      const freq = parseInt(document.getElementById('frequency').value);
+      const labels = Array.from({ length: time * freq + 1 }, (_, i) => (i / freq).toFixed(2));
+
+      const basePath = generatePath(initial, rate, 0, time, contribution, freq);
+      const variantPaths = [
+        generatePath(initial, rate, variance, time, contribution, freq),
+        generatePath(initial, rate, variance, time, contribution, freq),
+        generatePath(initial, rate, variance, time, contribution, freq)
+      ];
+
+      document.getElementById('result').innerText = `Base Case Future Value: $${basePath[basePath.length - 1].toFixed(2)}`;
+
+      const ctx = document.getElementById('interestChart').getContext('2d');
+      if (window.chart) window.chart.destroy();
+
+      window.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Base Case',
+              data: basePath,
+              borderColor: '#007bff',
+              borderWidth: 2,
+              pointRadius: 0,
+              fill: false,
+            },
+            ...variantPaths.map((p, i) => ({
+              label: `Variance Path ${i + 1}`,
+              data: p,
+              borderColor: `rgba(255, 99, 132, ${0.6 - i * 0.15})`,
+              borderWidth: 1,
+              pointRadius: 0,
+              fill: false,
+            }))
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Compound Interest Projection'
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Years'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Account Value ($)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
