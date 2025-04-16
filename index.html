@@ -7,20 +7,59 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-    }
-    input, select, button {
-      margin: 10px 0;
-      padding: 8px;
-      width: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f9;
     }
     .container {
       max-width: 600px;
-      margin: auto;
+      margin: 50px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 15px;
+      display: block;
+      color: #555;
+    }
+    input, select {
+      padding: 10px;
+      margin-top: 5px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    h3 {
+      text-align: center;
+      color: #222;
     }
     canvas {
-      margin-top: 30px;
+      margin-top: 40px;
     }
   </style>
 </head>
@@ -97,15 +136,18 @@
             {
               label: 'Base Case',
               data: basePath,
-              borderWidth: 2,
+              borderWidth: 3,
               borderColor: 'blue',
-              fill: false
+              fill: false,
+              pointRadius: 0
             },
             ...variantPaths.map((path, i) => ({
               label: `Variance Path ${i + 1}`,
               data: path,
               borderWidth: 1,
-              borderColor: `rgba(${100 + i * 50}, 0, 0, 0.5)`
+              borderColor: `rgba(${100 + i * 50}, 0, 0, 0.5)`,
+              fill: false,
+              pointRadius: 0
             }))
           ]
         },
@@ -138,3 +180,4 @@
   </script>
 </body>
 </html>
+
