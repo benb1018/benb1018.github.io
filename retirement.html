@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retirement Planner</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      margin-top: 10px;
+      display: block;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #28a745;
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1e7e34;
+    }
+    #result {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #222;
+    }
+    nav {
+      text-align: center;
+      margin-bottom: 20px;
+      background: #f0f0f0;
+      padding: 10px 0;
+      border-radius: 8px;
+    }
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #007bff;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="compound.html">Compound Calculator</a>
+    <a href="retirement.html">Retirement Planner</a>
+    <a href="loan.html">Loan Tool</a>
+  </nav>
+
+  <div class="container">
+    <h2>Retirement Planner</h2>
+
+    <label>Current Age:</label>
+    <input type="number" id="age" value="25" />
+
+    <label>Retirement Age:</label>
+    <input type="number" id="retireAge" value="65" />
+
+    <label>Current Retirement Savings ($):</label>
+    <input type="number" id="currentSavings" value="10000" />
+
+    <label>Annual Contribution ($):</label>
+    <input type="number" id="annualContribution" value="6000" />
+
+    <label>Expected Annual Return (%):</label>
+    <input type="number" id="returnRate" value="7" />
+
+    <button onclick="calculateRetirement()">Calculate</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    function calculateRetirement() {
+      const age = parseInt(document.getElementById('age').value);
+      const retireAge = parseInt(document.getElementById('retireAge').value);
+      const years = retireAge - age;
+      const current = parseFloat(document.getElementById('currentSavings').value);
+      const contribution = parseFloat(document.getElementById('annualContribution').value);
+      const returnRate = parseFloat(document.getElementById('returnRate').value) / 100;
+
+      let total = current;
+      for (let i = 0; i < years; i++) {
+        total = total * (1 + returnRate) + contribution;
+      }
+
+      document.getElementById('result').innerText =
+        `Estimated Retirement Savings at Age ${retireAge}: $${total.toFixed(2)}`;
+    }
+  </script>
+</body>
+</html>
+
