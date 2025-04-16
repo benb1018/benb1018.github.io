@@ -1,5 +1,3 @@
-// netlify/functions/ask-gpt.js
-
 export async function handler(event, context) {
   const { message } = JSON.parse(event.body);
 
@@ -12,16 +10,21 @@ export async function handler(event, context) {
     body: JSON.stringify({
       model: "gpt-3.5-turbo",
       messages: [
-        { role: "system", content: "You are a financial planning assistant. Ask the user questions to understand their retirement goals and give helpful advice." },
-        { role: "user", content: message },
-      ],
+        {
+          role: "system",
+          content: "You are a financial planning assistant. Ask the user questions to understand their retirement goals and offer helpful insights."
+        },
+        { role: "user", content: message }
+      ]
     }),
   });
 
   const data = await response.json();
 
+  const reply = data?.choices?.[0]?.message?.content || "Sorry, I couldn't understand the response.";
+
   return {
     statusCode: 200,
-    body: JSON.stringify({ reply: data.choices[0].message.content }),
+    body: JSON.stringify({ reply }),
   };
 }
