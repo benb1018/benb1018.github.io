@@ -1,11 +1,14 @@
-// Load environment variables (for local development)
+// Load environment variables (for local dev)
 if (typeof process !== "undefined" && process.env) {
   require('dotenv').config();
 }
 
+const fetch = require('node-fetch'); // You need this if running locally or testing in Node
 const apiKey = process.env.CLAUDE_API_KEY;
 
-async function askClaude(userMessage) {
+exports.handler = async function(event, context) {
+  const userMessage = JSON.parse(event.body).message || "Hello Claude";
+
   const url = 'https://api.anthropic.com/v1/messages';
 
   const headers = {
@@ -15,7 +18,7 @@ async function askClaude(userMessage) {
   };
 
   const body = {
-    model: "claude-3-opus-20240229", // or haiku/sonnet if you prefer
+    model: "claude-3-opus-20240229",
     max_tokens: 1000,
     messages: [
       { role: "user", content: userMessage }
@@ -31,16 +34,14 @@ async function askClaude(userMessage) {
 
     const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(`Claude API error: ${JSON.stringify(data)}`);
-    }
-
-    console.log("Claude's reply:", data);
-    return data;
+    return {
+      statusCode: 200,
+      body: JSON.stringify(data)
+    };
   } catch (err) {
-    console.error("Error calling Claude API:", err.message);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
+    };
   }
-}
-
-// Example usage (for dev testing)
-askClaude("What is the future of AI in wealth management?");
+};
