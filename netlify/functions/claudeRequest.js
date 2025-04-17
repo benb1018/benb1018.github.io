@@ -1,13 +1,14 @@
-// Load environment variables (for local dev)
-if (typeof process !== "undefined" && process.env) {
+// Load .env only during local development
+if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-const fetch = require('node-fetch'); // You need this if running locally or testing in Node
+const fetch = require('node-fetch');
+
 const apiKey = process.env.CLAUDE_API_KEY;
 
 exports.handler = async function(event, context) {
-  const userMessage = JSON.parse(event.body).message || "Hello Claude";
+  const { message } = JSON.parse(event.body || '{}');
 
   const url = 'https://api.anthropic.com/v1/messages';
 
@@ -21,24 +22,32 @@ exports.handler = async function(event, context) {
     model: "claude-3-opus-20240229",
     max_tokens: 1000,
     messages: [
-      { role: "user", content: userMessage }
+      { role: "user", content: message || "Hello Claude!" }
     ]
   };
 
   try {
-    const res = await fetch(url, {
+    const response = await fetch(url, {
       method: "POST",
       headers: headers,
       body: JSON.stringify(body)
     });
 
-    const data = await res.json();
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        statusCode: response.status,
+        body: JSON.stringify({ error: data })
+      };
+    }
 
     return {
       statusCode: 200,
       body: JSON.stringify(data)
     };
   } catch (err) {
+    console.error("Error calling Claude API:", err);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: err.message })
