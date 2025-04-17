@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Financial Assistant</title>
   <style>
     body {
@@ -11,113 +11,95 @@
       margin: 0;
       padding: 20px;
     }
+
     .container {
       max-width: 700px;
       margin: auto;
       background: white;
       padding: 25px;
       border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
+
     h2 {
       text-align: center;
       color: #333;
     }
-    nav {
-      text-align: center;
-      margin-bottom: 20px;
-      background: #f0f0f0;
-      padding: 10px 0;
-      border-radius: 8px;
-    }
-    nav a {
-      margin: 0 15px;
-      text-decoration: none;
-      color: #007bff;
-      font-weight: bold;
-    }
-    nav a:hover {
-      text-decoration: underline;
-    }
-    #chatbox {
-      height: 400px;
-      overflow-y: scroll;
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 10px;
+      font-size: 1rem;
       border: 1px solid #ccc;
-      padding: 10px;
       border-radius: 6px;
-      margin-bottom: 15px;
-      background: #fafafa;
+      resize: vertical;
     }
-    .user { color: #0056b3; font-weight: bold; }
-    .bot { color: #222; }
-    #userInput {
-      width: calc(100% - 100px);
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    #sendBtn {
-      width: 80px;
-      padding: 10px;
-      background: #007bff;
-      border: none;
+
+    button {
+      display: block;
+      margin: 15px auto;
+      padding: 10px 25px;
+      font-size: 1rem;
+      background-color: #4CAF50;
       color: white;
-      font-weight: bold;
+      border: none;
       border-radius: 6px;
       cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #response {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      min-height: 80px;
     }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="compound.html">Compound Calculator</a>
-    <a href="retirement.html">Retirement Planner</a>
-    <a href="loan.html">Loan Tool</a>
-    <a href="financialbot.html">AI Financial Assistant</a>
-  </nav>
-
   <div class="container">
     <h2>AI Financial Assistant</h2>
-    <div id="chatbox"></div>
-    <div style="display: flex; gap: 10px;">
-      <input type="text" id="userInput" placeholder="Type your message...">
-      <button id="sendBtn" onclick="sendMessage()">Send</button>
-    </div>
+    <textarea id="userInput" placeholder="Ask me anything about finance..."></textarea>
+    <button id="sendBtn">Send to Claude</button>
+
+    <h3>Response:</h3>
+    <div id="response">Your response will appear here...</div>
   </div>
 
   <script>
-    const chatbox = document.getElementById('chatbox');
-
-    function appendMessage(sender, message) {
-      const msg = document.createElement('div');
-      msg.className = sender;
-      msg.innerHTML = `<strong>${sender === 'user' ? 'You' : 'Bot'}:</strong> ${message}`;
-      chatbox.appendChild(msg);
-      chatbox.scrollTop = chatbox.scrollHeight;
-    }
-
-    async function sendMessage() {
-      const input = document.getElementById('userInput');
-      const userMsg = input.value.trim();
-      if (!userMsg) return;
-
-      appendMessage('user', userMsg);
-      input.value = '';
-
+    async function sendToClaude(userInput) {
       try {
-        const response = await fetch('/.netlify/functions/ask-gpt', {
+        const response = await fetch('/.netlify/functions/claudeRequest', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userMsg })
+          body: JSON.stringify({ message: userInput })
         });
 
         const data = await response.json();
-        appendMessage('bot', data.reply);
-      } catch (err) {
-        appendMessage('bot', 'Sorry, there was an error. Please try again.');
+
+        // Claude responses typically come as: { content: [{ text: "..." }] }
+        const output = data?.content?.[0]?.text || "No response received.";
+        document.getElementById("response").textContent = output;
+      } catch (error) {
+        document.getElementById("response").textContent = "Error: " + error.message;
+        console.error("Claude error:", error);
       }
     }
+
+    document.getElementById("sendBtn").addEventListener("click", () => {
+      const userInput = document.getElementById("userInput").value.trim();
+      if (userInput) {
+        document.getElementById("response").textContent = "Thinking...";
+        sendToClaude(userInput);
+      }
+    });
   </script>
 </body>
 </html>
